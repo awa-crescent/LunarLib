@@ -1,0 +1,6 @@
+name: LunarLib
+author: awa_crescent
+main: lib.lunar.LunarLibSpigot
+version: 1.0.0
+api-version: 1.19
+load: STARTUP

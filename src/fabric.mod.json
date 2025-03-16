@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "lunar-lib",
+	"version": "1.0.0",
+	"name": "Lunar Lib",
+	"description": "Basic Java library.",
+	"authors": [
+		"awa_crescent"
+	],
+	"contact": {
+		"homepage": "https://github.com/awa-crescent/",
+		"sources": "https://github.com/awa-crescent/LunarLib"
+	},
+	"license": "CC0-1.0",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"lib.lunar.LunarLibFabric"
+		]
+	},
+	"mixins": [
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+} 

@@ -1,0 +1,9 @@
+[{
+  "modid": "lunar-lib",
+  "name": "Lunar Lib",
+  "description": "Basic Java library.",
+  "version": "1.0.0.0",
+  "mcversion": "1.21",
+  "url": "https://github.com/awa-crescent/LunarLib",
+  "authorList": ["awa_crescent"],
+}]
