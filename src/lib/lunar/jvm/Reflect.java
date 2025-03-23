@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
- * 
  * 反射工具
  *
  * @param <T> 目标类
@@ -98,23 +97,68 @@ public abstract class Reflect {
 		return setValue(obj, getField(obj, field), value);
 	}
 
+	public static String methodDescription(String name, Class<?>... arg_types) {
+		String method_description = name + '(';
+		for (int a = 0; a < arg_types.length; ++a) {
+			method_description += arg_types[a].getName();
+			if (a != arg_types.length - 1)
+				method_description += ", ";
+		}
+		method_description += ')';
+		return method_description;
+	}
+
+	// 只搜寻该类自己的方法
+	public static Method getMethodSelf(Class<?> clazz, String name, Class<?>... arg_types) {
+		try {
+			return clazz.getDeclaredMethod(name, arg_types == null ? (new Class<?>[] {}) : arg_types);
+		} catch (NoSuchMethodException ex) {
+			return null;
+		}
+	}
+
+	// 只搜寻该类及其父类、实现接口的方法
+	public static Method getMethodDirectInherited(Class<?> clazz, String name, Class<?>... arg_types) {
+		try {
+			return clazz.getDeclaredMethod(name, arg_types == null ? (new Class<?>[] {}) : arg_types);
+		} catch (NoSuchMethodException ex) {
+			Class<?> supercls = clazz.getSuperclass();
+			Class<?>[] interfaces = clazz.getInterfaces();
+			if (supercls == null && interfaces.length == 0) {
+				System.err.println("Cannot find method " + name + " in neither super class nor implemented interfaces");
+				ex.printStackTrace();
+				return null;
+			} else {
+				Method method = getMethodSelf(supercls, name, arg_types);
+				if (method != null)// 如果父类有方法则优先返回父类的方法
+					return method;
+				else {// 从接口中搜寻方法
+					for (Class<?> i : interfaces)
+						method = getMethodSelf(i, name, arg_types);
+				}
+				return method;
+			}
+		}
+	}
+
 	public static Method getMethod(Object obj, String name, Class<?>... arg_types) {
 		Class<?> cls;
 		if (obj instanceof Class<?> c)
 			cls = c;
 		else
 			cls = obj.getClass();
-		try {
-			return cls.getDeclaredMethod(name, arg_types == null ? (new Class<?>[] {}) : arg_types);
-		} catch (NoSuchMethodException ex) {
-			Class<?> supercls = cls.getSuperclass();
-			if (supercls == null) {
-				System.err.println("Cannot find method " + name);
-				ex.printStackTrace();
-				return null;
-			} else
-				return getMethod(supercls, name, arg_types);
+		Method method = null;
+		ArrayList<ArrayList<Class<?>>> chain = resolveInheritImplamentChain(cls);
+		FOUND: for (int depth = 0; depth < chain.size(); ++depth) {
+			ArrayList<Class<?>> equal_depth_classes = chain.get(depth);
+			for (int i = 0; i < equal_depth_classes.size(); ++i)
+				if ((method = getMethodSelf(equal_depth_classes.get(i), name, arg_types)) != null)
+					break FOUND;
 		}
+		if (method == null) {
+			System.err.println("Method " + methodDescription(name, arg_types) + " not found in class " + cls.getName() + " or its parents");
+		}
+		return method;
 	}
 
 	public static void resolveInheritChain(Class<?> clazz, ArrayList<Class<?>> chain) {
@@ -127,7 +171,30 @@ public abstract class Reflect {
 	public static Class<?>[] resolveInheritChain(Class<?> clazz) {
 		ArrayList<Class<?>> chain = new ArrayList<>();
 		resolveInheritChain(clazz, chain);
-		return (Class<?>[]) chain.toArray();
+		return chain.toArray(new Class<?>[chain.size()]);
+	}
+
+	public static ArrayList<ArrayList<Class<?>>> resolveInheritImplamentChain(Class<?> self, int current_depth, ArrayList<ArrayList<Class<?>>> chain) {
+		ArrayList<Class<?>> current_depth_classes = null;
+		while (current_depth_classes == null)
+			try {
+				current_depth_classes = chain.get(current_depth);
+			} catch (IndexOutOfBoundsException ex) {
+				chain.add(new ArrayList<>());
+			}
+		current_depth_classes.add(self);
+		Class<?> supercls = self.getSuperclass();
+		if (supercls != null)
+			resolveInheritImplamentChain(supercls, current_depth + 1, chain);
+		Class<?>[] interfaces = self.getInterfaces();
+		for (Class<?> i : interfaces)
+			resolveInheritImplamentChain(i, current_depth + 1, chain);
+		return chain;
+	}
+
+	public static ArrayList<ArrayList<Class<?>>> resolveInheritImplamentChain(Class<?> clazz) {
+		ArrayList<ArrayList<Class<?>>> chain = new ArrayList<>();
+		return resolveInheritImplamentChain(clazz, 0, chain);
 	}
 
 	/**
@@ -187,10 +254,9 @@ public abstract class Reflect {
 	 * 
 	 * @param obj
 	 * @param args
-	 * 
 	 * @return
 	 */
-	public static Object construct(Object obj, Class<?> arg_types, Object... args) {
+	public static Object construct(Object obj, Class<?>[] arg_types, Object... args) {
 		Constructor<?> constructor = getConstructor(obj, arg_types);
 		try {
 			constructor.setAccessible(true);

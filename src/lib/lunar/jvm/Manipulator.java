@@ -23,8 +23,7 @@ public abstract class Manipulator {
 	private static Method staticFieldBase;
 	private static Method staticFieldOffset;
 	/*
-	 * 64位JVM的offset从12开始为数据段，此处为java.lang.reflect.AccessibleObject的boolean
-	 * override成员，将该成员覆写为true可以无视权限调用Method、Field、Constructor
+	 * 64位JVM的offset从12开始为数据段，此处为java.lang.reflect.AccessibleObject的boolean override成员，将该成员覆写为true可以无视权限调用Method、Field、Constructor
 	 */
 	private static long java_lang_reflect_AccessibleObject_override_OFFSET = 12;
 
@@ -72,8 +71,7 @@ public abstract class Manipulator {
 	}
 
 	/**
-	 * 获取对象定义的字段原对象，无视反射过滤和访问权限，直接调用JVM内部的native方法获取全部字段
-	 * 注意：本方法没有拷贝对象，因此对返回字段的任何修改都将反应在反射系统获取的所有的复制对象中
+	 * 获取对象定义的字段原对象，无视反射过滤和访问权限，直接调用JVM内部的native方法获取全部字段 注意：本方法没有拷贝对象，因此对返回字段的任何修改都将反应在反射系统获取的所有的复制对象中
 	 * 
 	 * @param clazz 要获取的类
 	 * @return 字段列表

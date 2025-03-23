@@ -6,7 +6,6 @@ import lib.lunar.jvm.Manipulator;
 import lib.lunar.jvm.Reflect;
 
 public class Version {
-	public static final Version this_version;
 	private static final HashMap<String, Integer> ver_revision_num = new HashMap<>();
 
 	public final String nms_version;// NMS版本，即craftbukkit的包名中的版本，例如1_21_R0
@@ -14,7 +13,15 @@ public class Version {
 	public final int nms_minor;
 	public final int nms_revision;
 
+	public final int version_num;// 根据版本判断工作方式
+
+	public static final Version v1_21_R1 = new Version(1, 21, 1);
 	public static final Version v1_21_R0 = new Version(1, 21, 0);
+	public static final Version v1_20_R1 = new Version(1, 21, 1);
+
+	public static final Version manual_this_version = v1_21_R0;
+
+	public static final Version this_version;
 
 	static {
 		// 主版本号数量
@@ -40,7 +47,7 @@ public class Version {
 		if (bukkit_clazz != null)
 			this_version = Version.fromBukkitVersion((String) Manipulator.invoke(bukkit_clazz, "getBukkitVersion", null));
 		else
-			this_version = v1_21_R0;
+			this_version = manual_this_version;
 	}
 
 	public Version(String nms_version) {
@@ -49,6 +56,7 @@ public class Version {
 		nms_major = Integer.parseInt(v[0]);
 		nms_minor = Integer.parseInt(v[1]);
 		nms_revision = Integer.parseInt(v[2].replace("R", ""));
+		version_num = Integer.parseInt((("" + nms_major) + nms_minor) + nms_revision);
 	}
 
 	public Version(int nms_major, int nms_minor, int nms_revision) {
@@ -56,6 +64,7 @@ public class Version {
 		this.nms_minor = nms_minor;
 		this.nms_revision = nms_revision;
 		nms_version = nms_major + "_" + nms_minor + "_R" + nms_revision;
+		version_num = Integer.parseInt((("" + nms_major) + nms_minor) + nms_revision);
 	}
 
 	public boolean newerThan(String nms_version) {
