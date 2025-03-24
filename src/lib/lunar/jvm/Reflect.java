@@ -99,11 +99,12 @@ public abstract class Reflect {
 
 	public static String methodDescription(String name, Class<?>... arg_types) {
 		String method_description = name + '(';
-		for (int a = 0; a < arg_types.length; ++a) {
-			method_description += arg_types[a].getName();
-			if (a != arg_types.length - 1)
-				method_description += ", ";
-		}
+		if (arg_types != null)
+			for (int a = 0; a < arg_types.length; ++a) {
+				method_description += arg_types[a].getName();
+				if (a != arg_types.length - 1)
+					method_description += ", ";
+			}
 		method_description += ')';
 		return method_description;
 	}

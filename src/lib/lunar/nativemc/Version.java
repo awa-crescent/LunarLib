@@ -17,7 +17,7 @@ public class Version {
 
 	public static final Version v1_21_R1 = new Version(1, 21, 1);
 	public static final Version v1_21_R0 = new Version(1, 21, 0);
-	public static final Version v1_20_R1 = new Version(1, 21, 1);
+	public static final Version v1_20_R1 = new Version(1, 20, 1);
 
 	public static final Version manual_this_version = v1_21_R0;
 
