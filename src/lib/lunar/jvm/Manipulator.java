@@ -201,13 +201,20 @@ public abstract class Manipulator {
 	 */
 	public static Object access(Object obj, String field_name) {
 		try {
-			Field f = Reflect.getField(obj, field_name);
-			if (f != null) {
-				Field field = Manipulator.removeAccessCheck(f);
-				return field.get(obj);
-			}
+			Field field = Manipulator.removeAccessCheck(Reflect.getField(obj, field_name));
+			return field.get(obj);
 		} catch (IllegalArgumentException | IllegalAccessException | SecurityException ex) {
 			System.err.println("access failed. obj=" + obj.toString() + ", field_name=" + field_name);
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
+	public static Object access(Object obj, Field field) {
+		try {
+			return Manipulator.removeAccessCheck(field).get(obj);
+		} catch (IllegalArgumentException | IllegalAccessException ex) {
+			System.err.println("access failed. obj=" + obj.toString() + ", field_name=" + field.getName());
 			ex.printStackTrace();
 		}
 		return null;
@@ -225,9 +232,25 @@ public abstract class Manipulator {
 		try {
 			Method method = Manipulator.removeAccessCheck(Reflect.getMethod(obj, method_name, arg_types));
 			return method.invoke(obj, args);
-		} catch (IllegalArgumentException | IllegalAccessException | SecurityException | InvocationTargetException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException | SecurityException ex) {
 			System.err.println("invoke failed. obj=" + obj.toString() + ", method_name=" + method_name);
 			ex.printStackTrace();
+		} catch (InvocationTargetException ex) {
+			System.err.println("invoke method throws exception. obj=" + obj.toString() + ", method_name=" + method_name);
+			ex.getCause().printStackTrace();
+		}
+		return null;
+	}
+
+	public static Object invoke(Object obj, Method method, Object... args) {
+		try {
+			return Manipulator.removeAccessCheck(method).invoke(obj, args);
+		} catch (IllegalArgumentException | IllegalAccessException | SecurityException ex) {
+			System.err.println("invoke failed. obj=" + obj.toString() + ", method_name=" + method.getName());
+			ex.printStackTrace();
+		} catch (InvocationTargetException ex) {
+			System.err.println("invoke method throws exception. obj=" + obj.toString() + ", method_name=" + method.getName());
+			ex.getCause().printStackTrace();
 		}
 		return null;
 	}
